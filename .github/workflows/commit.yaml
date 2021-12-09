@@ -1,0 +1,35 @@
+name: test commit
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  make-commit:
+    runs-on: ubuntu-latest 
+    
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          FILENAME=`date  +"%y%m%d%H%M%S"`.txt
+          echo 123 > $FILENAME
+          echo "::set-output name=$FILENAME"
+        id: write
+      
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "add ${{ steps.write.outputs.name }}"
+  
+  checkout-commit:
+    needs: make-commit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref_name }}
+      - run: |
+          ls -lh
+
